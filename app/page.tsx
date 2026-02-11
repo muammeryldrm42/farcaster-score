@@ -19,17 +19,17 @@ export default function HomePage() {
       try {
         const inside = await sdk.isInMiniApp();
         if (!inside) return;
-        const ctx = sdk.context;
-        if (!mounted) return;
-        if (ctx?.user?.fid) {
-          setUser({
-            fid: ctx.user.fid,
-            username: ctx.user.username,
-            displayName: ctx.user.displayName,
-            pfpUrl: ctx.user.pfpUrl,
-            bio: (ctx.user as any).bio,
-          });
-        }
+        const ctx: any = await (sdk as any).context;
+        const u = ctx?.user;
+        if (!u?.fid || !mounted) return;
+
+        setUser({
+          fid: u.fid,
+          username: u.username,
+          displayName: u.displayName,
+          pfpUrl: u.pfpUrl,
+          bio: u.bio,
+        });
       } catch {
         // ignore
       }
