@@ -1,0 +1,28 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Farcaster Score",
+    "iconUrl": "https://YOUR_DOMAIN/icon.png",
+    "homeUrl": "https://YOUR_DOMAIN/",
+    "splashImageUrl": "https://YOUR_DOMAIN/icon.png",
+    "splashBackgroundColor": "#ffffff",
+    "subtitle": "Mint your score",
+    "description": "View a heuristic Farcaster Score (0\u2013100) and mint it on Base for 0.0001 ETH.",
+    "primaryCategory": "social",
+    "tags": [
+      "farcaster",
+      "score",
+      "mint",
+      "base",
+      "nft"
+    ],
+    "ogTitle": "Farcaster Score",
+    "ogDescription": "Mint your score on Base",
+    "ogImageUrl": "https://YOUR_DOMAIN/api/og"
+  }
+}
