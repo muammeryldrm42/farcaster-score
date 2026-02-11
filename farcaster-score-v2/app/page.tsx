@@ -19,7 +19,7 @@ export default function HomePage() {
       try {
         const inside = await sdk.isInMiniApp();
         if (!inside) return;
-        const ctx = sdk.context;
+        const ctx = await sdk.context;
         if (!mounted) return;
         if (ctx?.user?.fid) {
           setUser({

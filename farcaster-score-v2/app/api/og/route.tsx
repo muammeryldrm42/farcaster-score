@@ -80,7 +80,7 @@ export async function GET(req: Request) {
           </div>
         </div>
       </div>
-    ),
+    ) as any,
     {
       width: 1200,
       height: 800,
