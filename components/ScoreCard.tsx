@@ -3,7 +3,16 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useReadContract,
+  useSwitchChain,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { base } from "wagmi/chains";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { CONTRACT_ABI, CONTRACT_ADDRESS, MINT_PRICE_WEI } from "@/lib/contract";
 
@@ -27,6 +36,7 @@ function formatAddr(addr?: string) {
 export function ScoreCard(props: Props) {
   const { fid, username, displayName, pfpUrl, bio, callReady, shareUrl } = props;
   const [inMiniApp, setInMiniApp] = React.useState<boolean | null>(null);
+  const [mintError, setMintError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -64,11 +74,30 @@ export function ScoreCard(props: Props) {
 
   // Wallet
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
   const { connect, isPending: isConnecting } = useConnect();
+  const { switchChainAsync, isPending: isSwitchingChain } = useSwitchChain();
   const { writeContract, data: txHash, isPending: isWriting, error: writeError } = useWriteContract();
   const { isLoading: isWaiting, isSuccess: isMined } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const mintDisabled = !CONTRACT_ADDRESS || !score || isWriting || isWaiting || isConnecting;
+  const { data: mintPriceOnChain, isError: mintPriceReadError } = useReadContract({
+    address: (CONTRACT_ADDRESS ?? "0x0000000000000000000000000000000000000000") as `0x${string}`,
+    abi: CONTRACT_ABI,
+    functionName: "mintPrice",
+    query: {
+      enabled: Boolean(CONTRACT_ADDRESS),
+    },
+  });
+
+  const effectiveMintPrice = mintPriceOnChain ?? MINT_PRICE_WEI;
+
+  const mintDisabled =
+    !CONTRACT_ADDRESS ||
+    score === null ||
+    isWriting ||
+    isWaiting ||
+    isConnecting ||
+    isSwitchingChain;
 
   async function onShare() {
     if (!shareUrl) return;
@@ -86,19 +115,32 @@ export function ScoreCard(props: Props) {
   }
 
   async function onMint() {
+    setMintError(null);
     if (!CONTRACT_ADDRESS) return;
     if (!isConnected) {
       connect({ connector: farcasterMiniApp() });
       return;
     }
-    const sc: number = score ?? 0;
-    writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: CONTRACT_ABI,
-      functionName: "mint",
-      args: [BigInt(fid), sc],
-      value: MINT_PRICE_WEI,
-    });
+
+    try {
+      if (!address) return;
+
+      if (chainId !== base.id) {
+        await switchChainAsync({ chainId: base.id });
+      }
+
+      const sc: number = score ?? 0;
+
+      writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: "mint",
+        args: [BigInt(fid), sc],
+        value: effectiveMintPrice,
+      });
+    } catch (e) {
+      setMintError(String((e as any)?.shortMessage || (e as any)?.message || e));
+    }
   }
 
   const nameLine = displayName || (username ? `@${username}` : `FID ${fid}`);
@@ -168,6 +210,8 @@ export function ScoreCard(props: Props) {
         {CONTRACT_ADDRESS
           ? !isConnected
             ? (isConnecting ? "Connecting…" : "Mint 0.0001 ETH")
+            : isSwitchingChain
+              ? "Switching to Base…"
             : isWriting
               ? "Confirming…"
               : isWaiting
@@ -181,6 +225,14 @@ export function ScoreCard(props: Props) {
       {writeError ? (
         <div style={styles.error}>
           {String((writeError as any)?.shortMessage || (writeError as any)?.message || writeError)}
+        </div>
+      ) : null}
+
+      {mintError ? <div style={styles.error}>{mintError}</div> : null}
+
+      {mintPriceReadError ? (
+        <div style={styles.error}>
+          Could not read mintPrice from RPC, using fallback 0.0001 ETH.
         </div>
       ) : null}
 
