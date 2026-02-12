@@ -8,13 +8,32 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
 const cache = new Map<string, CacheEntry>();
 
 async function getJson(url: string) {
-  const res = await fetch(url, {
-    // cache at edge/CDN ok; our own cache is additional
-    next: { revalidate: 300 },
-    headers: { "accept": "application/json" },
-  });
-  if (!res.ok) throw new Error(`Hub error ${res.status} for ${url}`);
-  return res.json();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort("timeout"), 8_000);
+  try {
+    const res = await fetch(url, {
+      // cache at edge/CDN ok; our own cache is additional
+      next: { revalidate: 300 },
+      headers: { "accept": "application/json" },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`Hub error ${res.status} for ${url}`);
+    return res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function safeGetMessages(url: string, fallbackLabel: string) {
+  try {
+    const data = await getJson(url);
+    return { messages: data?.messages || [], warning: null as string | null };
+  } catch (e: any) {
+    return {
+      messages: [],
+      warning: `${fallbackLabel}: ${String(e?.message || e)}`,
+    };
+  }
 }
 
 function extractUserData(messages: any[]) {
@@ -58,14 +77,16 @@ export async function GET(req: Request) {
     const pageSize = 100;
 
     const [casts, likes, following, followers, userData] = await Promise.all([
-      getJson(`${HUB}/v1/castsByFid?fid=${fid}&pageSize=${pageSize}`),
-      getJson(`${HUB}/v1/reactionsByFid?fid=${fid}&reaction_type=like&pageSize=${pageSize}`).catch(() => ({ messages: [] })),
-      getJson(`${HUB}/v1/linksByFid?fid=${fid}&link_type=follow&pageSize=${pageSize}`).catch(() => ({ messages: [] })),
-      getJson(`${HUB}/v1/linksByTargetFid?target_fid=${fid}&link_type=follow&pageSize=${pageSize}`).catch(() => ({ messages: [] })),
-      getJson(`${HUB}/v1/userDataByFid?fid=${fid}`).catch(() => ({ messages: [] })),
+      safeGetMessages(`${HUB}/v1/castsByFid?fid=${fid}&pageSize=${pageSize}`, "casts"),
+      safeGetMessages(`${HUB}/v1/reactionsByFid?fid=${fid}&reaction_type=like&pageSize=${pageSize}`, "likes"),
+      safeGetMessages(`${HUB}/v1/linksByFid?fid=${fid}&link_type=follow&pageSize=${pageSize}`, "following"),
+      safeGetMessages(`${HUB}/v1/linksByTargetFid?target_fid=${fid}&link_type=follow&pageSize=${pageSize}`, "followers"),
+      safeGetMessages(`${HUB}/v1/userDataByFid?fid=${fid}`, "userData"),
     ]);
 
-    const user = extractUserData(userData?.messages || []);
+    const warnings = [casts.warning, likes.warning, following.warning, followers.warning, userData.warning].filter(Boolean);
+
+    const user = extractUserData(userData.messages || []);
     // Farcaster user data types can vary; we just look for likely values.
     const pfp = user["USER_DATA_TYPE_PFP"] || user["6"] || user["pfp"] || "";
     const display = user["USER_DATA_TYPE_DISPLAY"] || user["2"] || user["display"] || "";
@@ -76,10 +97,10 @@ export async function GET(req: Request) {
       hasPfp: Boolean(pfp),
       hasDisplayName: Boolean(display || fname),
       hasBio: Boolean(bio),
-      castsSample: (casts?.messages || []).length,
-      likesSample: (likes?.messages || []).length,
-      followingSample: (following?.messages || []).length,
-      followersSample: (followers?.messages || []).length,
+      castsSample: (casts.messages || []).length,
+      likesSample: (likes.messages || []).length,
+      followingSample: (following.messages || []).length,
+      followersSample: (followers.messages || []).length,
     });
 
     const payload = {
@@ -91,16 +112,18 @@ export async function GET(req: Request) {
         pfpUrl: pfp || null,
       },
       samples: {
-        casts: (casts?.messages || []).length,
-        likes: (likes?.messages || []).length,
-        following: (following?.messages || []).length,
-        followers: (followers?.messages || []).length,
+        casts: (casts.messages || []).length,
+        likes: (likes.messages || []).length,
+        following: (following.messages || []).length,
+        followers: (followers.messages || []).length,
         pageSize,
       },
       breakdown,
       source: {
         hub: HUB,
         note: "Counts are sample-based (Hub APIs are paginated without totals).",
+        partial: warnings.length > 0,
+        warnings,
       },
     };
 
