@@ -17,7 +17,6 @@ contract FarcasterScore is ERC721, Ownable {
     using Strings for uint256;
 
     error WrongPrice();
-    error TreasuryTransferFailed();
 
     uint256 public constant mintPrice = 0.0001 ether;
     address public immutable treasury;
@@ -32,6 +31,7 @@ contract FarcasterScore is ERC721, Ownable {
     mapping(uint256 => ScoreData) public scoreByTokenId;
 
     event Minted(address indexed minter, uint256 indexed tokenId, uint256 fid, uint16 score, uint256 pricePaid);
+    event TreasuryPayoutDeferred(uint256 amount);
     event Withdrawn(address indexed to, uint256 amount);
 
     constructor(address _treasury) ERC721("Farcaster Score", "FCSCORE") Ownable(msg.sender) {
@@ -45,9 +45,12 @@ contract FarcasterScore is ERC721, Ownable {
         _safeMint(msg.sender, tokenId);
         scoreByTokenId[tokenId] = ScoreData({ fid: fid, score: score });
 
-        // Attempt immediate payout to treasury; if it fails, funds remain in the contract and can be withdrawn.
+        // Attempt immediate payout to treasury; if it fails, keep funds in the contract
+        // so minting still succeeds and owner can later recover with withdraw().
         (bool ok, ) = treasury.call{ value: msg.value }("");
-        if (!ok) revert TreasuryTransferFailed();
+        if (!ok) {
+            emit TreasuryPayoutDeferred(msg.value);
+        }
 
         emit Minted(msg.sender, tokenId, fid, score, msg.value);
     }

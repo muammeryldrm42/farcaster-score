@@ -85,3 +85,8 @@ Farcaster Hub HTTP APIs are paginated **without total counts**, so the score use
 - up to 100 casts, 100 likes, 100 followers, 100 following (per request)
 
 This keeps it free and fast on Vercel, but it’s intentionally a heuristic.
+
+### If mint simulation reverts in wallet
+A common cause is treasury payout failing during `mint()` (especially if treasury is a smart contract wallet that rejects plain ETH transfers).
+This repo's latest `FarcasterScore.sol` keeps mint funds in the contract when payout fails and lets owner recover later via `withdraw()`.
+Redeploy the contract and update `NEXT_PUBLIC_CONTRACT_ADDRESS` if your old deployment still reverts.

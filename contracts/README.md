@@ -27,3 +27,8 @@ Copy the deployed contract address and set it in the web app:
 - `NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourContract`
 
 Then redeploy Vercel.
+
+### If mint simulation reverts in wallet
+A common cause is treasury payout failing during `mint()` (especially if treasury is a smart contract wallet that rejects plain ETH transfers).
+This repo's latest `FarcasterScore.sol` keeps mint funds in the contract when payout fails and lets owner recover later via `withdraw()`.
+Redeploy the contract and update `NEXT_PUBLIC_CONTRACT_ADDRESS` if your old deployment still reverts.
