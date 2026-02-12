@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { computeScore } from "@/lib/score";
+import { normalizeCandidate } from "@/lib/config";
 
-const HUB = process.env.HUB_HTTP_URL || "https://hub.pinata.cloud";
+const HUB = normalizeCandidate(process.env.HUB_HTTP_URL || "https://hub.pinata.cloud");
 
 type CacheEntry = { at: number; value: any };
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 min

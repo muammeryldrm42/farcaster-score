@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { resolveAppBaseUrl } from "@/lib/config";
 
 export const runtime = "edge";
 
@@ -7,7 +8,7 @@ const APP_NAME = "Farcaster Score";
 async function fetchScore(fid?: string) {
   if (!fid) return null;
   try {
-    const base = process.env.NEXT_PUBLIC_APP_URL || "";
+    const base = resolveAppBaseUrl() || "";
     const url = `${base}/api/score?fid=${encodeURIComponent(fid)}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return null;
