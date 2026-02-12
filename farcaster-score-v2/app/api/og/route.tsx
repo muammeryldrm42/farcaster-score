@@ -5,11 +5,11 @@ export const runtime = "edge";
 
 const APP_NAME = "Farcaster Score";
 
-async function fetchScore(fid?: string) {
+async function fetchScore(fid: string | undefined, requestUrl: string) {
   if (!fid) return null;
   try {
-    const base = resolveAppBaseUrl() || "";
-    const url = `${base}/api/score?fid=${encodeURIComponent(fid)}`;
+    const base = resolveAppBaseUrl() || new URL(requestUrl).origin;
+    const url = new URL(`/api/score?fid=${encodeURIComponent(fid)}`, base).toString();
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return null;
     return res.json();
@@ -21,7 +21,7 @@ async function fetchScore(fid?: string) {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const fid = searchParams.get("fid") || undefined;
-  const data = await fetchScore(fid);
+  const data = await fetchScore(fid, req.url);
 
   const score = data?.breakdown?.total ?? null;
   const username = data?.profile?.username ? `@${data.profile.username}` : fid ? `FID ${fid}` : "Open in Farcaster";
