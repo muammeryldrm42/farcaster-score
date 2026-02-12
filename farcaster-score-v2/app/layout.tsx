@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import { resolveAppBaseUrl } from "@/lib/config";
+
+const appBaseUrl = resolveAppBaseUrl() || "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Farcaster Score",
   description: "Mint your Farcaster Score (0–100) on Base.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(appBaseUrl),
   openGraph: {
     title: "Farcaster Score",
     description: "Mint your Farcaster Score (0–100) on Base.",

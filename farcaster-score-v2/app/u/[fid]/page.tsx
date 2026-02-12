@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ScoreCard } from "@/components/ScoreCard";
+import { resolveAppBaseUrl } from "@/lib/config";
 
 function embedMeta(appUrl: string, imageUrl: string) {
   const miniapp = {
@@ -20,7 +21,7 @@ function embedMeta(appUrl: string, imageUrl: string) {
 
 export async function generateMetadata({ params }: { params: { fid: string } }): Promise<Metadata> {
   const fid = params.fid;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  const baseUrl = resolveAppBaseUrl() || "";
   const pageUrl = baseUrl ? `${baseUrl}/u/${fid}` : `/u/${fid}`;
   const img = baseUrl ? `${baseUrl}/api/og?fid=${fid}` : `/api/og?fid=${fid}`;
 
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: { params: { fid: string } }):
 }
 
 async function getScore(fid: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  const baseUrl = resolveAppBaseUrl() || "";
   const url = baseUrl ? `${baseUrl}/api/score?fid=${fid}` : `http://localhost:3000/api/score?fid=${fid}`;
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -53,7 +54,7 @@ export default async function UserPage({ params }: { params: { fid: string } }) 
   const profile = data?.profile ?? {};
   const fid = Number(params.fid);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  const baseUrl = resolveAppBaseUrl() || "";
   const shareUrl = baseUrl ? `${baseUrl}/u/${params.fid}` : undefined;
 
   return (
