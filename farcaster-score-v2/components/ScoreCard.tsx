@@ -81,7 +81,7 @@ export function ScoreCard(props: Props) {
   const { isLoading: isWaiting, isSuccess: isMined } = useWaitForTransactionReceipt({ hash: txHash });
 
   const mintValue = (typeof mintPriceOnchain === "bigint" ? mintPriceOnchain : MINT_PRICE_WEI);
-  const mintDisabled = !contractAddress || score === null || isWrongNetwork || isWriting || isWaiting || isConnecting || isSwitchingChain;
+  const mintDisabled = !contractAddress || score === null || isWriting || isWaiting || isConnecting || isSwitchingChain;
 
   async function onShare() {
     if (!shareUrl) return;
