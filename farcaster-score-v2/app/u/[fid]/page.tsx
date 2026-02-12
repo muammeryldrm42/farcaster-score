@@ -20,7 +20,7 @@ function embedMeta(appUrl: string, imageUrl: string) {
 
 export async function generateMetadata({ params }: { params: { fid: string } }): Promise<Metadata> {
   const fid = params.fid;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
   const pageUrl = baseUrl ? `${baseUrl}/u/${fid}` : `/u/${fid}`;
   const img = baseUrl ? `${baseUrl}/api/og?fid=${fid}` : `/api/og?fid=${fid}`;
 

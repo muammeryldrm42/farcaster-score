@@ -3,9 +3,10 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useConnect, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { CONTRACT_ABI, CONTRACT_ADDRESS, MINT_PRICE_WEI } from "@/lib/contract";
+import { isAddress } from "viem";
 
 type Props = {
   fid: number;
@@ -61,14 +62,22 @@ export function ScoreCard(props: Props) {
 
   const score = q.data?.breakdown?.total ?? null;
   const breakdown = q.data?.breakdown ?? null;
+  const contractAddress = CONTRACT_ADDRESS && isAddress(CONTRACT_ADDRESS) ? CONTRACT_ADDRESS : undefined;
 
   // Wallet
   const { address, isConnected } = useAccount();
   const { connect, isPending: isConnecting } = useConnect();
   const { writeContract, data: txHash, isPending: isWriting, error: writeError } = useWriteContract();
+  const { data: mintPriceOnchain } = useReadContract({
+    address: contractAddress,
+    abi: CONTRACT_ABI,
+    functionName: "mintPrice",
+    query: { enabled: Boolean(contractAddress) },
+  });
   const { isLoading: isWaiting, isSuccess: isMined } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const mintDisabled = !CONTRACT_ADDRESS || !score || isWriting || isWaiting || isConnecting;
+  const mintValue = (typeof mintPriceOnchain === "bigint" ? mintPriceOnchain : MINT_PRICE_WEI);
+  const mintDisabled = !contractAddress || score === null || isWriting || isWaiting || isConnecting;
 
   async function onShare() {
     if (!shareUrl) return;
@@ -86,18 +95,18 @@ export function ScoreCard(props: Props) {
   }
 
   async function onMint() {
-    if (!CONTRACT_ADDRESS) return;
+    if (!contractAddress) return;
     if (!isConnected) {
       connect({ connector: farcasterMiniApp() });
       return;
     }
     const sc: number = score ?? 0;
     writeContract({
-      address: CONTRACT_ADDRESS,
+      address: contractAddress,
       abi: CONTRACT_ABI,
       functionName: "mint",
       args: [BigInt(fid), sc],
-      value: MINT_PRICE_WEI,
+      value: mintValue,
     });
   }
 
@@ -165,7 +174,7 @@ export function ScoreCard(props: Props) {
       </div>
 
       <button onClick={onMint} style={styles.mintBtn} disabled={mintDisabled}>
-        {CONTRACT_ADDRESS
+        {contractAddress
           ? !isConnected
             ? (isConnecting ? "Connecting…" : "Mint 0.0001 ETH")
             : isWriting
@@ -177,6 +186,10 @@ export function ScoreCard(props: Props) {
                   : "Mint 0.0001 ETH"
           : "Set CONTRACT address"}
       </button>
+
+      {CONTRACT_ADDRESS && !contractAddress ? (
+        <div style={styles.error}>Invalid NEXT_PUBLIC_CONTRACT_ADDRESS format.</div>
+      ) : null}
 
       {writeError ? (
         <div style={styles.error}>
