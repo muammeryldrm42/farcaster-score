@@ -1,3 +1,4 @@
+@'
 {
   "name": "farcaster-score-miniapp",
   "version": "2.0.0",
@@ -29,3 +30,4 @@
     "typescript": "5.4.5"
   }
 }
+'@ | Set-Content -Path .\package.json -Encoding utf8
