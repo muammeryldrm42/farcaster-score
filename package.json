@@ -16,14 +16,11 @@
     "react-dom": "18.2.0",
     "viem": "2.47.6",
     "wagmi": "2.19.0"
-<<<<<<< HEAD
   },
   "overrides": {
     "viem": "2.47.6",
     "@wagmi/core": "2.19.0",
     "wagmi": "2.19.0"
-=======
->>>>>>> a1d163d (fix build and dependency versions)
   },
   "devDependencies": {
     "@types/node": "20.11.30",
