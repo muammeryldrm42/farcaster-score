@@ -13,7 +13,7 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { base } from "wagmi/chains";
+import { base } from "viem/chains";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { CONTRACT_ABI, CONTRACT_ADDRESS, MINT_PRICE_WEI } from "@/lib/contract";
 
