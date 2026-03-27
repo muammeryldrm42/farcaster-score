@@ -8,8 +8,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Farcaster Score",
     description: "Mint your Farcaster Score (0â€“100) on Base.",
-    images: ["/api/og"]
-  }
+    images: ["/api/og"],
+  },
+  other: {
+    "base:app_id": "69c6fe62a76c587116ffdfa5",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
