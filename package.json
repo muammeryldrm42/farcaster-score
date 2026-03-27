@@ -17,11 +17,14 @@
     "react-dom": "18.2.0",
     "viem": "2.47.6",
     "wagmi": "2.19.0"
+<<<<<<< HEAD
   },
   "overrides": {
     "viem": "2.47.6",
     "@wagmi/core": "2.19.0",
     "wagmi": "2.19.0"
+=======
+>>>>>>> 5f5cb50 (fix providers import)
   },
   "devDependencies": {
     "@types/node": "20.11.30",
@@ -29,5 +32,9 @@
     "@types/react-dom": "18.2.22",
     "typescript": "5.4.5"
   }
+<<<<<<< HEAD
 }
 '@ | Set-Content -Path .\package.json -Encoding utf8
+=======
+}
+>>>>>>> 5f5cb50 (fix providers import)

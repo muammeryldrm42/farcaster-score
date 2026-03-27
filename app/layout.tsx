@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "./providers";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "Farcaster Score",
-  description: "Mint your Farcaster Score (0–100) on Base.",
+  description: "Mint your Farcaster Score (0â€“100) on Base.",
   openGraph: {
     title: "Farcaster Score",
-    description: "Mint your Farcaster Score (0–100) on Base.",
+    description: "Mint your Farcaster Score (0â€“100) on Base.",
     images: ["/api/og"]
   }
 };
