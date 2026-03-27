@@ -63,7 +63,7 @@ export default async function UserPage({ params }: { params: { fid: string } }) 
       displayName={profile.displayName ?? undefined}
       pfpUrl={profile.pfpUrl ?? undefined}
       bio={profile.bio ?? undefined}
-      shareUrl={shareUrl}
+      shareUrl="https://farcaster.xyz/miniapps/2iYSzt6baYGh/farcaster-score"
     />
   );
 }
