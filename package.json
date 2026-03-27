@@ -14,8 +14,13 @@
     "next": "14.2.30",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "viem": "2.21.57",
-    "wagmi": "2.16.3"
+    "viem": "2.32.1",
+    "wagmi": "2.15.7"
+  },
+  "overrides": {
+    "viem": "2.32.1",
+    "@wagmi/core": "2.15.7",
+    "wagmi": "2.15.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
