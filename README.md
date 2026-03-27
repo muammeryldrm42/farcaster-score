@@ -48,7 +48,7 @@ Then redeploy.
 ## 3) Deploy the contract (Base)
 Open `contracts/README.md` and deploy **FarcasterScore.sol**.
 Treasury (mint revenue) is already set to:
-`0xB68caDE785359874280859d1650d9Ad92315B916`
+`0x95125EaA037fb6280839A5433DaC4CD3EB46C8ff`
 
 After deployment, put the contract address into:
 - `NEXT_PUBLIC_CONTRACT_ADDRESS`
