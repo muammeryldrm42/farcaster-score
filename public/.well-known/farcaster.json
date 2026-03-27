@@ -1,9 +1,9 @@
 {
-  "accountAssociation": {
-    "header": "",
-    "payload": "",
-    "signature": ""
-  },
+ "accountAssociation": {
+  "header": "eyJmaWQiOjQ5MjE1MCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEI2OGNhREU3ODUzNTk4NzQyODA4NTlkMTY1MGQ5QWQ5MjMxNUI5MTYifQ",
+  "payload": "eyJkb21haW4iOiJmYXJjYXN0ZXItc2NvcmUtc2V2ZW4udmVyY2VsLmFwcCJ9",
+  "signature": "61gjdLfpIhY5xE65kcf3bjeVXeT1oAh0YWbef+cUodd/ptYCWMoW1J3W0IfNn8VmrjQdbGzsip4DHaTjOXL80Rs="
+}
   "miniapp": {
     "version": "1",
     "name": "Farcaster Score",
