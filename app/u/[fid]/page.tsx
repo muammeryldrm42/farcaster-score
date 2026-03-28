@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-
 import { ScoreCard } from "@/components/ScoreCard";
 
 const CANONICAL_MINIAPP_URL =
@@ -29,6 +28,7 @@ export async function generateMetadata({
   params: { fid: string };
 }): Promise<Metadata> {
   const fid = params.fid;
+
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
