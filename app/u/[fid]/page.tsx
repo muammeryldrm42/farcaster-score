@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+
 import { ScoreCard } from "@/components/ScoreCard";
+
+const CANONICAL_MINIAPP_URL =
+  "https://farcaster.xyz/miniapps/2iYSzt6baYGh/farcaster-score";
 
 function embedMeta(appUrl: string, imageUrl: string) {
   const miniapp = {
@@ -13,15 +17,23 @@ function embedMeta(appUrl: string, imageUrl: string) {
       },
     },
   };
+
   return {
     "fc:miniapp": JSON.stringify(miniapp),
   } as Record<string, string>;
 }
 
-export async function generateMetadata({ params }: { params: { fid: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { fid: string };
+}): Promise<Metadata> {
   const fid = params.fid;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
-  const pageUrl = baseUrl ? `${baseUrl}/u/${fid}` : `/u/${fid}`;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+
+  const pageUrl = CANONICAL_MINIAPP_URL;
   const img = baseUrl ? `${baseUrl}/api/og?fid=${fid}` : `/api/og?fid=${fid}`;
 
   return {
@@ -37,8 +49,14 @@ export async function generateMetadata({ params }: { params: { fid: string } }):
 }
 
 async function getScore(fid: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-  const url = baseUrl ? `${baseUrl}/api/score?fid=${fid}` : `http://localhost:3000/api/score?fid=${fid}`;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+
+  const url = baseUrl
+    ? `${baseUrl}/api/score?fid=${fid}`
+    : `http://localhost:3000/api/score?fid=${fid}`;
+
   try {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return null;
@@ -48,13 +66,14 @@ async function getScore(fid: string) {
   }
 }
 
-export default async function UserPage({ params }: { params: { fid: string } }) {
+export default async function UserPage({
+  params,
+}: {
+  params: { fid: string };
+}) {
   const data = await getScore(params.fid);
   const profile = data?.profile ?? {};
   const fid = Number(params.fid);
-
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-  const shareUrl = baseUrl ? `${baseUrl}/u/${params.fid}` : undefined;
 
   return (
     <ScoreCard
@@ -63,7 +82,7 @@ export default async function UserPage({ params }: { params: { fid: string } }) 
       displayName={profile.displayName ?? undefined}
       pfpUrl={profile.pfpUrl ?? undefined}
       bio={profile.bio ?? undefined}
-      shareUrl="https://farcaster.xyz/miniapps/2iYSzt6baYGh/farcaster-score"
+      shareUrl={CANONICAL_MINIAPP_URL}
     />
   );
 }
