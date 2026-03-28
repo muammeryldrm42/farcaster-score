@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-
 import { ScoreCard } from "@/components/ScoreCard";
 
 const CANONICAL_MINIAPP_URL =
